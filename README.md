@@ -108,6 +108,33 @@ chmod +x ./publish/linux-x64/GitDoc
 chmod +x ./publish/osx-arm64/GitDoc
 ```
 
+## Crear un GitHub Release
+
+El repositorio incluye un workflow que genera automáticamente los binarios autónomos para Windows x64, Linux x64, macOS Intel y macOS Apple Silicon. Los archivos se publican en la sección **Releases** de GitHub y no se guardan dentro del historial del repositorio.
+
+Primero asegúrese de que todos los cambios estén confirmados y publicados. Luego cree una versión mediante una etiqueta con formato `vMAJOR.MINOR.PATCH`:
+
+```bash
+git tag -a v1.0.0 -m "GitDoc 1.0.0"
+git push origin v1.0.0
+```
+
+El workflow `.github/workflows/release.yml` compilará y publicará:
+
+- `GitDoc-v1.0.0-win-x64.zip`
+- `GitDoc-v1.0.0-linux-x64.tar.gz`
+- `GitDoc-v1.0.0-osx-x64.tar.gz`
+- `GitDoc-v1.0.0-osx-arm64.tar.gz`
+
+Para publicar una versión posterior:
+
+```bash
+git tag -a v1.1.0 -m "GitDoc 1.1.0"
+git push origin v1.1.0
+```
+
+> No reutilice una etiqueta ya publicada. Cada release debe tener una versión nueva.
+
 ## Instrucciones de uso
 
 ```text

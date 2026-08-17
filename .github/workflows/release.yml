@@ -1,0 +1,84 @@
+name: Publicar release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Compilar ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive: tar.gz
+          - os: windows-latest
+            rid: win-x64
+            archive: zip
+          - os: macos-14
+            rid: osx-x64
+            archive: tar.gz
+          - os: macos-14
+            rid: osx-arm64
+            archive: tar.gz
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Publicar binario autónomo
+        shell: bash
+        run: >-
+          dotnet publish GitDoc.csproj
+          --configuration Release
+          --runtime ${{ matrix.rid }}
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          --output publish/${{ matrix.rid }}
+
+      - name: Comprimir Linux o macOS
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: tar -czf GitDoc-${{ github.ref_name }}-${{ matrix.rid }}.tar.gz -C publish/${{ matrix.rid }} .
+
+      - name: Comprimir Windows
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: Compress-Archive -Path "publish/${{ matrix.rid }}/*" -DestinationPath "GitDoc-${{ github.ref_name }}-${{ matrix.rid }}.zip"
+
+      - name: Guardar artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: GitDoc-${{ matrix.rid }}
+          path: GitDoc-${{ github.ref_name }}-${{ matrix.rid }}.${{ matrix.archive }}
+          if-no-files-found: error
+
+  release:
+    name: Crear GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar binarios
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" artifacts/* --verify-tag --generate-notes --title "GitDoc $GITHUB_REF_NAME"
