@@ -1,0 +1,45 @@
+# Compilación de .NET
+bin/
+obj/
+artifacts/
+
+# Visual Studio, VS Code y Rider
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# Resultados de pruebas y cobertura
+TestResults/
+coverage/
+coverage.*
+*.trx
+
+# Paquetes y publicación
+*.nupkg
+*.snupkg
+publish/
+
+# Archivos temporales y registros
+*.log
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+secrets.json
+
+# Documentos generados localmente por GitDoc
+CHANGELOG_SPRINT.md
+cambios*.md
+cambios*.pdf
